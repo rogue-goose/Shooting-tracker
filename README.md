@@ -2,6 +2,7 @@
 App to help track range qualifications 
 
 Qualification Tracker V10
+
 ⚠️ Data & Privacy Notice
 
 Offline & Private: This application does not sync to the cloud. All data is stored locally in your device's browser. To share data or move it to another device, you must use the "Export" or "Save Backup" features.
