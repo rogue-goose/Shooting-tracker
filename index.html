@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Military Shooting Tracker V13</title>
+    <title>Military Shooting Tracker V15</title>
     <style>
         :root {
             --primary-green: #4CAF50; --bg-gray: #f4f7f6; 
             --danger-red: #dc3545; --info-blue: #008CBA; --accent-orange: #f39c12;
+            --dark-gray: #333;
         }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -17,16 +18,14 @@
             max-width: 1100px; margin: auto; background: white; 
             padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
         }
-        h2, h3 { color: #333; border-bottom: 3px solid var(--primary-green); padding-bottom: 8px; }
+        h2, h3 { color: #333; border-bottom: 3px solid var(--primary-green); padding-bottom: 8px; margin-top: 25px; }
         
         .sync-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .setup-section { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
         
-        /* Layout fix for mobile scaling */
         .control-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 15px; }
         .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 250px; }
         
-        /* Column adding fields - specifically adjusted for phone */
         .col-adder-group { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
         .col-adder-group input { flex: 1; min-width: 120px; }
         .col-adder-group button { flex: 1; min-width: 100%; margin-top: 5px; }
@@ -35,18 +34,24 @@
             .col-adder-group button { min-width: auto; flex: 0.5; margin-top: 0; }
         }
 
+        /* Stats Banners */
+        .stats-banner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
+        
+        .type-breakout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        
+        .stat-card { background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #ddd; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-card.breakout { border-left: 5px solid var(--info-blue); text-align: left; }
+        .stat-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .stat-value { font-size: 22px; font-weight: bold; margin-top: 5px; }
+        
+        .breakout-sub { font-size: 13px; margin-top: 4px; display: flex; justify-content: space-between; }
+
         .score-type-tag {
-            display: inline-flex; align-items: center; background: #333;
+            display: inline-flex; align-items: center; background: var(--dark-gray);
             color: white; padding: 8px 12px; border-radius: 4px; margin: 5px 5px 0 0; font-size: 13px;
         }
         .remove-score-btn { margin-left: 10px; cursor: pointer; color: #ff6b6b; font-weight: bold; padding: 2px 5px; }
-
-        /* Stats */
-        .stats-banner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
-        .stat-card { background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #ddd; text-align: center; }
-        .stat-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; }
-        .stat-value { font-size: 22px; font-weight: bold; margin-top: 5px; }
 
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -60,7 +65,7 @@
         .btn-clear { background-color: var(--danger-red); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* Mobile Table Stacking (Optimized) */
+        /* Responsive Table */
         @media screen and (max-width: 600px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; }
@@ -86,7 +91,7 @@
 <body>
 
 <div class="container">
-    <h2>Qualification Tracker V13</h2>
+    <h2>Qualification Tracker V15</h2>
 
     <div class="sync-section">
         <strong style="width: 100%;">🔄 Device Sync / Backup</strong>
@@ -127,11 +132,17 @@
         <div id="activeColumnsList"></div>
     </div>
 
+    <h3>Unit Totals</h3>
     <div class="stats-banner">
-        <div class="stat-card"><div class="stat-label">Total</div><div id="statTotal" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">Fully Qual</div><div id="statQual" class="stat-value status-qual">0</div></div>
-        <div class="stat-card"><div class="stat-label">Unqual</div><div id="statUnqual" class="stat-value status-unqual">0</div></div>
-        <div class="stat-card"><div class="stat-label">Pending</div><div id="statPending" class="stat-value status-pending">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Personnel</div><div id="statTotal" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">Fully Qualified</div><div id="statQual" class="stat-value status-qual">0</div></div>
+        <div class="stat-card"><div class="stat-label">Any Failure</div><div id="statUnqual" class="stat-value status-unqual">0</div></div>
+        <div class="stat-card"><div class="stat-label">Incomplete</div><div id="statPending" class="stat-value status-pending">0</div></div>
+    </div>
+
+    <h3>Detailed Type Breakout</h3>
+    <div id="typeBreakoutArea" class="type-breakout-grid">
+        <!-- Dynamic Cards added here -->
     </div>
 
     <div class="control-row" style="justify-content: center;">
@@ -176,7 +187,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'mil_range_v13_final';
+    const STORAGE_KEY = 'mil_range_v15_final';
     let appData = {
         config: { range: "", event: "", date: new Date().toISOString().split('T')[0], columns: [{ label: "Day", threshold: 23 }] },
         roster: []
@@ -252,8 +263,13 @@
         
         document.getElementById('firstName').value = "";
         document.getElementById('lastName').value = "";
+        document.getElementById('rank').value = "";
+        document.getElementById('unit').value = "";
+        document.getElementById('company').value = "";
+        
         save();
         checkValidity();
+        document.getElementById('firstName').focus();
     }
 
     function updateScore(sid, label, val) {
@@ -276,7 +292,11 @@
 
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
-        let stats = { total: appData.roster.length, qual: 0, unqual: 0, pending: 0 };
+        
+        // Stats tracking
+        let globalStats = { total: appData.roster.length, fullyQual: 0, anyFail: 0, pending: 0 };
+        let typeBreakdowns = {}; 
+        appData.config.columns.forEach(c => { typeBreakdowns[c.label] = { pass: 0, fail: 0, open: 0 }; });
 
         appData.roster.forEach(s => {
             let soldierStatus = "qual"; 
@@ -285,10 +305,20 @@
             const scoreCells = appData.config.columns.map(c => {
                 const val = s.scores[c.label];
                 let css = "status-pending", txt = "Pending";
+                
                 if (val !== "") {
-                    if (parseInt(val) >= c.threshold) { txt = "Pass"; css = "status-qual"; }
-                    else { txt = "Fail"; css = "status-unqual"; soldierStatus = "unqual"; }
-                } else { hasEmpty = true; }
+                    if (parseInt(val) >= c.threshold) { 
+                        txt = "Pass"; css = "status-qual"; 
+                        typeBreakdowns[c.label].pass++;
+                    } else { 
+                        txt = "Fail"; css = "status-unqual"; 
+                        soldierStatus = "unqual"; 
+                        typeBreakdowns[c.label].fail++;
+                    }
+                } else { 
+                    hasEmpty = true; 
+                    typeBreakdowns[c.label].open++;
+                }
 
                 return `<td data-label="${c.label}">
                     <input type="number" class="score-input" value="${val}" onchange="updateScore('${s.id}', '${c.label}', this.value)">
@@ -296,9 +326,9 @@
                 </td>`;
             }).join('');
 
-            if (hasEmpty) { stats.pending++; }
-            else if (soldierStatus === "qual") { stats.qual++; }
-            else { stats.unqual++; }
+            if (hasEmpty) globalStats.pending++;
+            else if (soldierStatus === "qual") globalStats.fullyQual++;
+            else globalStats.anyFail++;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -311,10 +341,27 @@
             tbody.appendChild(tr);
         });
 
-        document.getElementById('statTotal').innerText = stats.total;
-        document.getElementById('statQual').innerText = stats.qual;
-        document.getElementById('statUnqual').innerText = stats.unqual;
-        document.getElementById('statPending').innerText = stats.pending;
+        // Update Top Banner
+        document.getElementById('statTotal').innerText = globalStats.total;
+        document.getElementById('statQual').innerText = globalStats.fullyQual;
+        document.getElementById('statUnqual').innerText = globalStats.anyFail;
+        document.getElementById('statPending').innerText = globalStats.pending;
+
+        // Update Type Breakouts
+        const breakoutArea = document.getElementById('typeBreakoutArea');
+        breakoutArea.innerHTML = appData.config.columns.map(c => {
+            const b = typeBreakdowns[c.label];
+            return `
+                <div class="stat-card breakout">
+                    <div class="stat-label">${c.label} Breakdown</div>
+                    <div class="stat-value">${b.pass} <span style="font-size:12px; color:#666">Passed</span></div>
+                    <div class="breakout-sub">
+                        <span class="status-unqual">Fails: ${b.fail}</span>
+                        <span class="status-pending">Left: ${b.open}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     function deleteSoldier(id) {
@@ -357,8 +404,10 @@
     function importBackup(event) {
         const reader = new FileReader();
         reader.onload = (e) => { 
-            appData = JSON.parse(e.target.result); 
-            save(); 
+            try {
+                appData = JSON.parse(e.target.result); 
+                save(); 
+            } catch(err) { alert("Invalid backup file"); }
         };
         reader.readAsText(event.target.files[0]);
     }
