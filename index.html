@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Military Shooting Tracker V11 - Professional</title>
+    <title>Military Shooting Tracker V12</title>
     <style>
         :root {
             --primary-green: #4CAF50; --bg-gray: #f4f7f6; 
@@ -20,7 +20,6 @@
         h2, h3 { color: #333; border-bottom: 3px solid var(--primary-green); padding-bottom: 8px; }
         
         .sync-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        
         .setup-section { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
         
         .control-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 15px; }
@@ -32,6 +31,7 @@
         }
         .remove-score-btn { margin-left: 10px; cursor: pointer; color: #ff6b6b; font-weight: bold; }
 
+        /* Stats restored from V10 */
         .stats-banner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
         .stat-card { background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #ddd; text-align: center; }
@@ -41,7 +41,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
         
-        input, select { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; }
+        input, select { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; background-color: #fff;}
         button { padding: 12px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; }
         
         .btn-save { background-color: var(--primary-green); }
@@ -50,80 +50,84 @@
         .btn-clear { background-color: var(--danger-red); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        .table-container { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: var(--primary-green); color: white; padding: 12px; text-align: left; }
-        td { border: 1px solid #ddd; padding: 10px; }
-        
-        .score-input { width: 60px; padding: 5px; text-align: center; font-weight: bold; }
-        .status-qual { color: green; font-weight: bold; font-size: 12px; }
-        .status-unqual { color: red; font-weight: bold; font-size: 12px; }
-        .status-pending { color: #888; font-style: italic; font-size: 12px; }
+        /* Mobile Responsive Table (V10 Style) */
+        @media screen and (max-width: 600px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; }
+            tr { border: 1px solid #ccc; margin-bottom: 15px; border-radius: 8px; background: #fff; padding: 10px; }
+            td { border: none; position: relative; padding-left: 45% !important; text-align: right; border-bottom: 1px solid #eee; min-height: 35px;}
+            td:before { position: absolute; left: 10px; font-weight: bold; content: attr(data-label); color: #666; }
+            .score-input { width: 100% !important; box-sizing: border-box; }
+        }
+        @media screen and (min-width: 601px) {
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: var(--primary-green); color: white; }
+            .score-input { width: 70px; text-align: center; }
+        }
+
+        .status-qual { color: green; font-weight: bold; }
+        .status-unqual { color: red; font-weight: bold; }
+        .status-pending { color: #888; font-style: italic; }
         .warning-text { color: #856404; font-size: 12px; font-weight: bold; display: none; width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Qualification Tracker V11</h2>
+    <h2>Qualification Tracker V12</h2>
 
-    <!-- SYNC / BACKUP SECTION -->
     <div class="sync-section">
         <strong style="width: 100%;">🔄 Device Sync / Backup</strong>
         <button class="btn-sync" onclick="exportBackup()">Save Backup File</button>
         <button class="btn-sync" style="background-color: #6c757d;" onclick="document.getElementById('importFile').click()">Load Backup File</button>
         <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
-        <p id="iosWarning" class="warning-text">⚠️ iOS Detected: You MUST click 'Save Backup File' before closing this app to keep your data.</p>
+        <p id="iosWarning" class="warning-text">⚠️ iOS Detected: Click 'Save Backup File' to keep data.</p>
     </div>
 
-    <!-- EXPORT & FILE SETTINGS -->
     <div class="setup-section">
         <h3>Range Setup & Naming</h3>
         <div class="control-row">
             <div class="input-group">
                 <label>Range/Location</label>
-                <input type="text" id="rangeLocation" placeholder="e.g. Range 4" oninput="updateFilePreview()">
+                <input type="text" id="rangeLocation" placeholder="e.g. Range 4" oninput="updateConfig()">
             </div>
             <div class="input-group">
                 <label>Event Type</label>
-                <input type="text" id="qualName" placeholder="e.g. M4_Qual" oninput="updateFilePreview()">
+                <input type="text" id="qualName" placeholder="e.g. M4_Qual" oninput="updateConfig()">
             </div>
             <div class="input-group">
                 <label>Date</label>
-                <input type="date" id="rangeDate" onchange="updateFilePreview()">
+                <input type="date" id="rangeDate" onchange="updateConfig()">
             </div>
         </div>
-        <p><strong>File Name Preview:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Range_Report.csv</span></p>
-        
+        <p><strong>File Name:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Qual_Report.csv</span></p>
         <hr>
-        
-        <!-- DYNAMIC COLUMN CONFIG -->
         <div class="control-row">
             <div class="input-group">
-                <label>Add New Score Requirement (e.g. Day, CBRN, Night)</label>
+                <label>Add Qualification Type</label>
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="newScoreLabel" placeholder="Column Name" style="flex: 2;">
-                    <input type="number" id="newScoreThreshold" placeholder="Min" style="flex: 1;">
-                    <button class="btn-save" onclick="addColumn()">+ Add Score Type</button>
+                    <input type="text" id="newScoreLabel" placeholder="Label (e.g. CBRN)" style="flex: 2;">
+                    <input type="number" id="newScoreThreshold" placeholder="Pass Score" style="flex: 1;">
+                    <button class="btn-save" onclick="addColumn()">+ Add</button>
                 </div>
             </div>
         </div>
         <div id="activeColumnsList"></div>
     </div>
 
-    <!-- STATS -->
     <div class="stats-banner">
         <div class="stat-card"><div class="stat-label">Total</div><div id="statTotal" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">Fully Qual</div><div id="statQual" class="stat-value" style="color:green">0</div></div>
-        <div class="stat-card"><div class="stat-label">Actions</div>
-            <div style="display: flex; gap: 5px; justify-content: center; margin-top: 5px;">
-                <button class="btn-export" style="padding:5px 10px; font-size:11px;" onclick="exportToCSV()">Export CSV</button>
-                <button class="btn-clear" style="padding:5px 10px; font-size:11px;" onclick="clearAllData()">Clear All</button>
-            </div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Fully Qual</div><div id="statQual" class="stat-value status-qual">0</div></div>
+        <div class="stat-card"><div class="stat-label">Unqual</div><div id="statUnqual" class="stat-value status-unqual">0</div></div>
+        <div class="stat-card"><div class="stat-label">Pending</div><div id="statPending" class="stat-value status-pending">0</div></div>
     </div>
 
-    <!-- ROSTER ENTRY -->
+    <div class="control-row">
+        <button class="btn-export" onclick="exportToCSV()">Export for Excel</button>
+        <button class="btn-clear" onclick="clearAllData()">Clear All Data</button>
+    </div>
+
     <h3>Roster Entry</h3>
     <div class="form-grid">
         <div class="input-group"><label>First Name</label><input type="text" id="firstName" class="req-input"></div>
@@ -153,48 +157,41 @@
         <div class="input-group"><label>&nbsp;</label><button id="submitBtn" class="btn-save" onclick="addSoldier()" disabled>Add Soldier</button></div>
     </div>
 
-    <!-- DATA TABLE -->
     <h3>Roster Details</h3>
-    <div class="table-container">
-        <table id="dataTable">
-            <thead>
-                <tr id="tableHeaderRow">
-                    <!-- Dynamic Headers -->
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-    </div>
+    <table id="dataTable">
+        <thead id="tableHeader"></thead>
+        <tbody id="tableBody"></tbody>
+    </table>
 </div>
 
 <script>
-    const STORAGE_KEY = 'mil_range_data_v11_multi';
-    let memorySession = {
-        config: {
-            range: "", event: "", date: new Date().toISOString().split('T')[0],
-            columns: [{ label: "Day", threshold: 23 }]
-        },
+    const STORAGE_KEY = 'mil_range_v12_final';
+    let appData = {
+        config: { range: "", event: "", date: new Date().toISOString().split('T')[0], columns: [{ label: "Day", threshold: 23 }] },
         roster: []
     };
 
-    // iOS Detection
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
         document.getElementById('iosWarning').style.display = 'block';
     }
 
-    function getData() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : memorySession;
-        } catch (e) { return memorySession; }
-    }
-
-    function saveData(data) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    function init() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) appData = JSON.parse(saved);
+        
+        // Populate inputs from saved config
+        document.getElementById('rangeLocation').value = appData.config.range || "";
+        document.getElementById('qualName').value = appData.config.event || "";
+        document.getElementById('rangeDate').value = appData.config.date || "";
+        
         renderUI();
     }
 
-    // Validation
+    function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        renderUI();
+    }
+
     const reqInputs = document.querySelectorAll('.req-input');
     const submitBtn = document.getElementById('submitBtn');
     function checkValidity() {
@@ -204,15 +201,11 @@
     }
     reqInputs.forEach(i => i.addEventListener('input', checkValidity));
 
-    function updateFilePreview() {
-        const data = getData();
-        data.config.range = document.getElementById('rangeLocation').value;
-        data.config.event = document.getElementById('qualName').value;
-        data.config.date = document.getElementById('rangeDate').value;
-        
-        const name = `${data.config.event || 'Qual'}_${data.config.range || 'Range'}_${data.config.date}.csv`.replace(/\s+/g, '_');
-        document.getElementById('fileNamePreview').innerText = name;
-        saveData(data);
+    function updateConfig() {
+        appData.config.range = document.getElementById('rangeLocation').value;
+        appData.config.event = document.getElementById('qualName').value;
+        appData.config.date = document.getElementById('rangeDate').value;
+        save();
     }
 
     function addColumn() {
@@ -220,25 +213,21 @@
         const thresh = parseInt(document.getElementById('newScoreThreshold').value);
         if (!label || isNaN(thresh)) return alert("Enter label and threshold");
         
-        const data = getData();
-        data.config.columns.push({ label, threshold: thresh });
-        // Initialize new field for existing roster
-        data.roster.forEach(s => { if (s.scores[label] === undefined) s.scores[label] = ""; });
-        
+        appData.config.columns.push({ label, threshold: thresh });
+        appData.roster.forEach(s => { if (s.scores[label] === undefined) s.scores[label] = ""; });
         document.getElementById('newScoreLabel').value = "";
         document.getElementById('newScoreThreshold').value = "";
-        saveData(data);
+        save();
     }
 
     function removeColumn(index) {
-        if (!confirm("Remove this column? All scores in this category will be deleted.")) return;
-        const data = getData();
-        data.config.columns.splice(index, 1);
-        saveData(data);
+        if (confirm("Remove column and all associated scores?")) {
+            appData.config.columns.splice(index, 1);
+            save();
+        }
     }
 
     function addSoldier() {
-        const data = getData();
         const soldier = {
             id: Date.now().toString(),
             firstName: document.getElementById('firstName').value.trim(),
@@ -248,149 +237,127 @@
             company: document.getElementById('company').value.trim(),
             scores: {}
         };
-        data.config.columns.forEach(c => soldier.scores[c.label] = "");
+        appData.config.columns.forEach(c => soldier.scores[c.label] = "");
+        appData.roster.push(soldier);
         
-        data.roster.push(soldier);
-        saveData(data);
-        
-        // Reset name fields
         document.getElementById('firstName').value = "";
         document.getElementById('lastName').value = "";
+        save();
         checkValidity();
     }
 
-    function updateScore(soldierId, label, val) {
-        const data = getData();
-        const soldier = data.roster.find(s => s.id === soldierId);
-        if (soldier) {
-            soldier.scores[label] = val;
-            saveData(data);
-        }
+    function updateScore(sid, label, val) {
+        const s = appData.roster.find(x => x.id === sid);
+        if (s) { s.scores[label] = val; save(); }
     }
 
     function renderUI() {
-        const data = getData();
-        
-        // Setup fields
-        document.getElementById('rangeLocation').value = data.config.range;
-        document.getElementById('qualName').value = data.config.event;
-        document.getElementById('rangeDate').value = data.config.date;
+        // Filename Preview
+        const nameStr = `${appData.config.event || 'Qual'}_${appData.config.range || 'Range'}_${appData.config.date}.csv`.replace(/\s+/g, '_');
+        document.getElementById('fileNamePreview').innerText = nameStr;
 
-        // Render Column Tags
-        const colList = document.getElementById('activeColumnsList');
-        colList.innerHTML = data.config.columns.map((c, i) => `
+        // Columns
+        document.getElementById('activeColumnsList').innerHTML = appData.config.columns.map((c, i) => `
             <span class="score-type-tag">${c.label} (Min: ${c.threshold}) 
             <span class="remove-score-btn" onclick="removeColumn(${i})">×</span></span>
         `).join('');
 
-        // Render Table Headers
-        const headerRow = document.getElementById('tableHeaderRow');
-        headerRow.innerHTML = `<th>Name</th><th>Rank</th><th>Unit/Co</th>` + 
-            data.config.columns.map(c => `<th>${c.label}</th>`).join('') + `<th>Action</th>`;
+        // Table Header
+        document.getElementById('tableHeader').innerHTML = `<tr>
+            <th>Name</th><th>Rank</th><th>Unit/Co</th>` + 
+            appData.config.columns.map(c => `<th>${c.label}</th>`).join('') + `<th>Action</th></tr>`;
 
-        // Render Body
+        // Table Body & Stats
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
-        let fullyQualCount = 0;
+        let stats = { total: appData.roster.length, qual: 0, unqual: 0, pending: 0 };
 
-        data.roster.forEach(s => {
-            let isFullyQual = data.config.columns.length > 0;
-            const tr = document.createElement('tr');
-            
-            let scoreCols = data.config.columns.map(c => {
+        appData.roster.forEach(s => {
+            let soldierStatus = "qual"; // Assume qual until proven otherwise
+            let hasEmpty = false;
+
+            const scoreCells = appData.config.columns.map(c => {
                 const val = s.scores[c.label];
-                let status = "status-pending", text = "Pending";
+                let css = "status-pending", txt = "Pending";
                 if (val !== "") {
-                    if (parseInt(val) >= c.threshold) { text = "Pass"; status = "status-qual"; }
-                    else { text = "Fail"; status = "status-unqual"; isFullyQual = false; }
-                } else { isFullyQual = false; }
+                    if (parseInt(val) >= c.threshold) { txt = "Pass"; css = "status-qual"; }
+                    else { txt = "Fail"; css = "status-unqual"; soldierStatus = "unqual"; }
+                } else { hasEmpty = true; }
 
-                return `<td>
+                return `<td data-label="${c.label}">
                     <input type="number" class="score-input" value="${val}" onchange="updateScore('${s.id}', '${c.label}', this.value)">
-                    <div class="${status}">${text}</div>
+                    <div class="${css}" style="font-size:11px">${txt}</div>
                 </td>`;
             }).join('');
 
-            if (isFullyQual) fullyQualCount++;
+            if (hasEmpty) { stats.pending++; }
+            else if (soldierStatus === "qual") { stats.qual++; }
+            else { stats.unqual++; }
 
+            const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${s.lastName}, ${s.firstName}</td>
-                <td>${s.rank}</td>
-                <td>${s.unit} / ${s.company}</td>
-                ${scoreCols}
-                <td><button class="btn-clear" style="padding:5px 10px; font-size:10px;" onclick="deleteRecord('${s.id}')">Del</button></td>
+                <td data-label="Name">${s.lastName}, ${s.firstName}</td>
+                <td data-label="Rank">${s.rank}</td>
+                <td data-label="Unit/Co">${s.unit} / ${s.company}</td>
+                ${scoreCells}
+                <td data-label="Action"><button class="btn-clear" style="padding:5px 10px; font-size:11px" onclick="deleteSoldier('${s.id}')">Remove</button></td>
             `;
             tbody.appendChild(tr);
         });
 
-        document.getElementById('statTotal').innerText = data.roster.length;
-        document.getElementById('statQual').innerText = fullyQualCount;
+        document.getElementById('statTotal').innerText = stats.total;
+        document.getElementById('statQual').innerText = stats.qual;
+        document.getElementById('statUnqual').innerText = stats.unqual;
+        document.getElementById('statPending').innerText = stats.pending;
     }
 
-    function deleteRecord(id) {
-        if (!confirm("Remove soldier?")) return;
-        const data = getData();
-        data.roster = data.roster.filter(s => s.id !== id);
-        saveData(data);
+    function deleteSoldier(id) {
+        if(confirm("Delete record?")) { appData.roster = appData.roster.filter(s => s.id !== id); save(); }
     }
 
     function clearAllData() {
-        if (!confirm("WARNING: Wiping ALL data!")) return;
-        const data = getData();
-        data.roster = [];
-        saveData(data);
+        if(confirm("WIPE ALL DATA?")) { appData.roster = []; save(); }
     }
 
     function exportToCSV() {
-        const data = getData();
-        if (!data.roster.length) return alert("No data to export");
-        
+        if (!appData.roster.length) return alert("No data");
         let headers = ["Last Name", "First Name", "Rank", "Unit", "Company"];
-        data.config.columns.forEach(c => { headers.push(c.label, `${c.label}_Status`); });
-        
+        appData.config.columns.forEach(c => headers.push(c.label, `${c.label}_Status`));
         let csv = headers.join(",") + "\n";
-        data.roster.forEach(s => {
+        appData.roster.forEach(s => {
             let row = [s.lastName, s.firstName, s.rank, s.unit, s.company];
-            data.config.columns.forEach(c => {
+            appData.config.columns.forEach(c => {
                 const val = s.scores[c.label];
-                let stat = val === "" ? "Pending" : (parseInt(val) >= c.threshold ? "Qual" : "Unqual");
-                row.push(val, stat);
+                let st = val==="" ? "Pending" : (parseInt(val)>=c.threshold ? "Pass" : "Fail");
+                row.push(val, st);
             });
             csv += row.map(v => `"${v}"`).join(",") + "\n";
         });
-
-        downloadFile(csv, document.getElementById('fileNamePreview').innerText, 'text/csv');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = document.getElementById('fileNamePreview').innerText;
+        a.click();
     }
 
     function exportBackup() {
-        const data = JSON.stringify(getData());
-        downloadFile(data, `Backup_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-    }
-
-    function downloadFile(content, filename, type) {
-        const blob = new Blob([content], { type });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
+        const blob = new Blob([JSON.stringify(appData)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Range_Backup_${appData.config.date}.json`;
+        a.click();
     }
 
     function importBackup(event) {
-        const file = event.target.files[0];
-        if (!file) return;
         const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const imported = JSON.parse(e.target.result);
-                if (confirm("Overwrite current data with this backup?")) saveData(imported);
-            } catch (err) { alert("Invalid file format"); }
+        reader.onload = (e) => { 
+            appData = JSON.parse(e.target.result); 
+            save(); 
         };
-        reader.readAsText(file);
+        reader.readAsText(event.target.files[0]);
     }
 
-    // Startup
-    renderUI();
+    init();
 </script>
-
 </body>
 </html>
