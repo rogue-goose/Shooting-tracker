@@ -1,51 +1,50 @@
 # Shooting-tracker
-App to help track range qualifications 
+**App to help track range qualifications**
 
-Qualification Tracker V10
+## Qualification Tracker V15
 
-⚠️ Data & Privacy Notice
+### ⚠️ Data & Privacy Notice
+*   **Offline & Private:** This application does not sync to a cloud server. All data is stored locally in your device's browser `localStorage`. 
+*   **Data Persistence:** V15 features improved persistence logic; however, clearing your browser cache may delete your data.
+*   **Install as an App:** Open this page in your mobile browser, tap the **Share** icon (iOS) or **Menu** icon (Android), and select **"Add to Home Screen"** to use it as a standalone app.
 
-Offline & Private: This application does not sync to the cloud. All data is stored locally in your device's browser. To share data or move it to another device, you must use the "Export" or "Save Backup" features.
-
-Install as an App: You can use this like a native app! Open this page in your mobile browser, tap the Share icon (iOS) or Menu icon (Android), and select "Add to Home Screen."
+---
 
 ## What it Is
-The Qualification Tracker is a lightweight, mobile-responsive web tool designed for range officers and leaders to manage shooting rosters in real-time. It replaces paper logs with a digital interface that provides instant statistics on shooter performance.
+The **Qualification Tracker** is a high-speed, mobile-responsive tool designed for Range OICs, NCOICs, and lane safeties. It allows for the management of complex shooting rosters with multiple qualification requirements (e.g., Day, Night, and CBRN) in one unified interface.
 
 ## Key Features
-Real-Time Dashboard: Instant visibility of Total, Qualified, Unqualified, and Pending shooters.
+*   **Detailed Analytics Breakout:** View pass/fail/pending counts for every specific qualification type individually, in addition to the overall "Fully Qualified" unit status.
+*   **Custom Qualification Types:** Dynamically add as many qualification events as needed. Set unique passing thresholds for each (e.g., 23 for Day, 5 for CBRN).
+*   **Persistent Configuration:** Your Range Location, Event Name, and Date are now saved to the device, ensuring the exported CSV filename remains consistent even after a page refresh.
+*   **Smart Form Clearing:** The roster entry form auto-clears all fields (including Rank, Unit, and Company) after each entry to prevent "ghost data" and accidental duplicate inputs.
+*   **Enhanced Mobile Scaling:** Features a "stacking" table design optimized for one-handed use on smartphones.
 
-Dynamic Thresholds: Change the "Qual Threshold" (e.g., 23) to instantly update the status of every soldier on the list.
-
-Mobile-First Design: Features a responsive layout that shifts from a table on desktops to "action cards" on mobile devices.
-
-Data Portability: * Export for Excel: Generates a .csv report for official filing.
-
-Backup & Sync: Save .json files to keep a hard copy of your data or move it to a different tablet or phone.
+---
 
 ## How it Works
-1. Set the Standard
 
-Enter the passing score in the Qual Threshold box. The application uses this number to automatically calculate if a soldier is "Qualified" or "Unqualified" the moment you enter a score.
+### 1. Range Setup & Naming
+Enter your **Range/Location** and **Event Type**. The app automatically generates a professional filename (e.g., `M4_Qual_Range_4_2026-05-03.csv`) for your exports. 
 
-2. Build Your Roster
+### 2. Define Qualification Standards
+Under **"Add Qualification Type,"** enter a label and a minimum passing score. 
+*   *Example:* Label "Day", Threshold "23". 
+*   Adding a type creates a new column across the entire roster and a new analytics card in the Breakout section.
 
-Input personnel via the Roster Entry section. The app includes a comprehensive rank dropdown covering Enlisted, Warrant Officer, and Officer ranks.
+### 3. Build Your Roster
+Input personnel details. The "Add Soldier" button remains disabled until all required fields are filled. Upon clicking, the form resets and focuses back on the "First Name" field for rapid-fire data entry.
 
-3. Record & Track
+### 4. Record & Track
+*   **Live Scoring:** Type scores directly into the table. The "Pass/Fail/Pending" status updates instantly.
+*   **Fully Qualified Status:** A soldier only moves to "Fully Qualified" once they have passed **every** defined qualification type.
+*   **Detailed Breakouts:** Check the **Type Breakout** cards to see exactly how many shooters still need to cycle through specific lanes (e.g., how many shooters are "Open" for Night Fire).
 
-Enter Scores: Type the score directly into the roster table.
+### 5. Backup & Reporting
+*   **Save Backup:** Download a `.json` file containing your entire setup and roster.
+*   **Load Backup:** Import data from another device or a previous day.
+*   **Export for Excel:** Generates a formatted `.csv` report including individual scores and pass/fail status strings for easy filing with S-3.
 
-Live Updates: The status column and top banner stats update immediately.
+---
 
-Management: Use the "Remove" button to delete individual entries or "Clear All Data" to reset for a new range day.
-
-4. Backup & Sharing
-
-Save Backup: Creates a file containing all your settings and shooters.
-
-Load Backup: Imports a previously saved roster.
-
-Export for Excel: Creates a spreadsheet-ready file for your final range report.
-
-Pro-Tip for Range Officers: If you are using an iPhone or iPad, ensure you click "Save Backup File" before closing your browser to ensure no data is lost during session timeouts.
+**Pro-Tip for Range Officers:** When switching between multiple lanes or devices, use the **Save Backup File** frequently. If you are using an iOS device, this is the most reliable way to ensure data is preserved across long periods of inactivity.
