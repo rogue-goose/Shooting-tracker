@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Military Shooting Tracker V12</title>
+    <title>Military Shooting Tracker V13</title>
     <style>
         :root {
             --primary-green: #4CAF50; --bg-gray: #f4f7f6; 
@@ -22,16 +22,26 @@
         .sync-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .setup-section { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
         
+        /* Layout fix for mobile scaling */
         .control-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 250px; }
         
+        /* Column adding fields - specifically adjusted for phone */
+        .col-adder-group { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
+        .col-adder-group input { flex: 1; min-width: 120px; }
+        .col-adder-group button { flex: 1; min-width: 100%; margin-top: 5px; }
+
+        @media (min-width: 600px) {
+            .col-adder-group button { min-width: auto; flex: 0.5; margin-top: 0; }
+        }
+
         .score-type-tag {
             display: inline-flex; align-items: center; background: #333;
-            color: white; padding: 5px 12px; border-radius: 4px; margin: 5px 5px 0 0; font-size: 13px;
+            color: white; padding: 8px 12px; border-radius: 4px; margin: 5px 5px 0 0; font-size: 13px;
         }
-        .remove-score-btn { margin-left: 10px; cursor: pointer; color: #ff6b6b; font-weight: bold; }
+        .remove-score-btn { margin-left: 10px; cursor: pointer; color: #ff6b6b; font-weight: bold; padding: 2px 5px; }
 
-        /* Stats restored from V10 */
+        /* Stats */
         .stats-banner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
         .stat-card { background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #ddd; text-align: center; }
@@ -50,14 +60,15 @@
         .btn-clear { background-color: var(--danger-red); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* Mobile Responsive Table (V10 Style) */
+        /* Mobile Table Stacking (Optimized) */
         @media screen and (max-width: 600px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; }
             tr { border: 1px solid #ccc; margin-bottom: 15px; border-radius: 8px; background: #fff; padding: 10px; }
-            td { border: none; position: relative; padding-left: 45% !important; text-align: right; border-bottom: 1px solid #eee; min-height: 35px;}
+            td { border: none; position: relative; padding-left: 45% !important; text-align: right; border-bottom: 1px solid #eee; min-height: 40px; display: flex; align-items: center; justify-content: flex-end; }
             td:before { position: absolute; left: 10px; font-weight: bold; content: attr(data-label); color: #666; }
-            .score-input { width: 100% !important; box-sizing: border-box; }
+            .score-input { width: 80px !important; }
+            .status-box { margin-left: 10px; min-width: 50px; }
         }
         @media screen and (min-width: 601px) {
             table { width: 100%; border-collapse: collapse; }
@@ -75,7 +86,7 @@
 <body>
 
 <div class="container">
-    <h2>Qualification Tracker V12</h2>
+    <h2>Qualification Tracker V13</h2>
 
     <div class="sync-section">
         <strong style="width: 100%;">🔄 Device Sync / Backup</strong>
@@ -101,15 +112,15 @@
                 <input type="date" id="rangeDate" onchange="updateConfig()">
             </div>
         </div>
-        <p><strong>File Name:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Qual_Report.csv</span></p>
+        <p><strong>Current Filename:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Qual_Report.csv</span></p>
         <hr>
         <div class="control-row">
             <div class="input-group">
-                <label>Add Qualification Type</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="newScoreLabel" placeholder="Label (e.g. CBRN)" style="flex: 2;">
-                    <input type="number" id="newScoreThreshold" placeholder="Pass Score" style="flex: 1;">
-                    <button class="btn-save" onclick="addColumn()">+ Add</button>
+                <label>Add Qualification Type (e.g. Day, CBRN, Night)</label>
+                <div class="col-adder-group">
+                    <input type="text" id="newScoreLabel" placeholder="Label">
+                    <input type="number" id="newScoreThreshold" placeholder="Pass Score">
+                    <button class="btn-save" onclick="addColumn()">+ Add Type</button>
                 </div>
             </div>
         </div>
@@ -123,9 +134,9 @@
         <div class="stat-card"><div class="stat-label">Pending</div><div id="statPending" class="stat-value status-pending">0</div></div>
     </div>
 
-    <div class="control-row">
-        <button class="btn-export" onclick="exportToCSV()">Export for Excel</button>
-        <button class="btn-clear" onclick="clearAllData()">Clear All Data</button>
+    <div class="control-row" style="justify-content: center;">
+        <button class="btn-export" style="flex: 1; max-width: 250px;" onclick="exportToCSV()">Export for Excel</button>
+        <button class="btn-clear" style="flex: 1; max-width: 250px;" onclick="clearAllData()">Clear All Data</button>
     </div>
 
     <h3>Roster Entry</h3>
@@ -165,7 +176,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'mil_range_v12_final';
+    const STORAGE_KEY = 'mil_range_v13_final';
     let appData = {
         config: { range: "", event: "", date: new Date().toISOString().split('T')[0], columns: [{ label: "Day", threshold: 23 }] },
         roster: []
@@ -179,7 +190,6 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) appData = JSON.parse(saved);
         
-        // Populate inputs from saved config
         document.getElementById('rangeLocation').value = appData.config.range || "";
         document.getElementById('qualName').value = appData.config.event || "";
         document.getElementById('rangeDate').value = appData.config.date || "";
@@ -252,28 +262,24 @@
     }
 
     function renderUI() {
-        // Filename Preview
         const nameStr = `${appData.config.event || 'Qual'}_${appData.config.range || 'Range'}_${appData.config.date}.csv`.replace(/\s+/g, '_');
         document.getElementById('fileNamePreview').innerText = nameStr;
 
-        // Columns
         document.getElementById('activeColumnsList').innerHTML = appData.config.columns.map((c, i) => `
             <span class="score-type-tag">${c.label} (Min: ${c.threshold}) 
             <span class="remove-score-btn" onclick="removeColumn(${i})">×</span></span>
         `).join('');
 
-        // Table Header
         document.getElementById('tableHeader').innerHTML = `<tr>
             <th>Name</th><th>Rank</th><th>Unit/Co</th>` + 
             appData.config.columns.map(c => `<th>${c.label}</th>`).join('') + `<th>Action</th></tr>`;
 
-        // Table Body & Stats
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
         let stats = { total: appData.roster.length, qual: 0, unqual: 0, pending: 0 };
 
         appData.roster.forEach(s => {
-            let soldierStatus = "qual"; // Assume qual until proven otherwise
+            let soldierStatus = "qual"; 
             let hasEmpty = false;
 
             const scoreCells = appData.config.columns.map(c => {
@@ -286,7 +292,7 @@
 
                 return `<td data-label="${c.label}">
                     <input type="number" class="score-input" value="${val}" onchange="updateScore('${s.id}', '${c.label}', this.value)">
-                    <div class="${css}" style="font-size:11px">${txt}</div>
+                    <div class="status-box ${css}" style="font-size:11px">${txt}</div>
                 </td>`;
             }).join('');
 
