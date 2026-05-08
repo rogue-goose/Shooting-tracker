@@ -3,69 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Military Shooting Tracker V15</title>
+    <title>Military Shooting Tracker V16.8</title>
     <style>
         :root {
             --primary-green: #4CAF50; --bg-gray: #f4f7f6; 
             --danger-red: #dc3545; --info-blue: #008CBA; --accent-orange: #f39c12;
-            --dark-gray: #333;
+            --dark-gray: #333; --light-border: #ddd;
         }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background-color: var(--bg-gray); padding: 10px; margin: 0;
         }
         .container { 
-            max-width: 1100px; margin: auto; background: white; 
-            padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            max-width: 1200px; margin: auto; background: white; 
+            padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
         }
+        
+        .view { display: none; }
+        .view.active { display: block; }
         h2, h3 { color: #333; border-bottom: 3px solid var(--primary-green); padding-bottom: 8px; margin-top: 25px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary-green); padding-bottom: 10px; margin-bottom: 20px;}
+        .header-bar h2 { border: none; margin: 0; padding: 0; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px;}
+        .event-card { border: 1px solid var(--light-border); border-radius: 8px; padding: 15px; background: #fafafa; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .event-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: var(--primary-green);}
+        .event-card h3 { margin-top: 0; border: none; padding-bottom: 0; color: var(--info-blue);}
+        .event-card p { margin: 5px 0; font-size: 14px; color: #555;}
         
         .sync-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .setup-section { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
         
         .control-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 250px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
         
-        .col-adder-group { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
-        .col-adder-group input { flex: 1; min-width: 120px; }
+        .col-adder-group { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center;}
+        .col-adder-group input, .col-adder-group select { flex: 1; min-width: 100px; }
         .col-adder-group button { flex: 1; min-width: 100%; margin-top: 5px; }
+        @media (min-width: 768px) { .col-adder-group button { min-width: auto; flex: 0.5; margin-top: 0; } }
 
-        @media (min-width: 600px) {
-            .col-adder-group button { min-width: auto; flex: 0.5; margin-top: 0; }
-        }
-
-        /* Stats Banners */
         .stats-banner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
-        
         .type-breakout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px; }
         
         .stat-card { background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #ddd; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-card.breakout { border-left: 5px solid var(--info-blue); text-align: left; }
         .stat-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; }
         .stat-value { font-size: 22px; font-weight: bold; margin-top: 5px; }
-        
         .breakout-sub { font-size: 13px; margin-top: 4px; display: flex; justify-content: space-between; }
-
+        
         .score-type-tag {
             display: inline-flex; align-items: center; background: var(--dark-gray);
             color: white; padding: 8px 12px; border-radius: 4px; margin: 5px 5px 0 0; font-size: 13px;
         }
-        .remove-score-btn { margin-left: 10px; cursor: pointer; color: #ff6b6b; font-weight: bold; padding: 2px 5px; }
+        .score-btn { margin-left: 8px; cursor: pointer; font-weight: bold; padding: 2px 5px; }
+        .score-btn.edit { color: #4CAF50; }
+        .score-btn.remove { color: #ff6b6b; }
 
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
         
-        input, select { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; background-color: #fff;}
-        button { padding: 12px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; }
+        input, select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; background-color: #fff;}
+        .search-bar { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; box-sizing: border-box; }
+        button { padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; transition: opacity 0.2s;}
+        button:hover { opacity: 0.9; }
         
         .btn-save { background-color: var(--primary-green); }
         .btn-export { background-color: var(--info-blue); }
-        .btn-sync { background-color: var(--accent-orange); }
+        .btn-sync { background-color: var(--accent-orange); color: #fff;}
         .btn-clear { background-color: var(--danger-red); }
+        .btn-secondary { background-color: #6c757d; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* Responsive Table */
         @media screen and (max-width: 600px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; }
@@ -73,125 +81,197 @@
             td { border: none; position: relative; padding-left: 45% !important; text-align: right; border-bottom: 1px solid #eee; min-height: 40px; display: flex; align-items: center; justify-content: flex-end; }
             td:before { position: absolute; left: 10px; font-weight: bold; content: attr(data-label); color: #666; }
             .score-input { width: 80px !important; }
-            .status-box { margin-left: 10px; min-width: 50px; }
         }
         @media screen and (min-width: 601px) {
             table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px;}
             th { background-color: var(--primary-green); color: white; }
             .score-input { width: 70px; text-align: center; }
         }
-
         .status-qual { color: green; font-weight: bold; }
         .status-unqual { color: red; font-weight: bold; }
         .status-pending { color: #888; font-style: italic; }
         .warning-text { color: #856404; font-size: 12px; font-weight: bold; display: none; width: 100%; }
+
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: white;}
+        .bg-pass { background-color: var(--primary-green); }
+        .bg-fail { background-color: var(--danger-red); }
+        .bg-pend { background-color: #6c757d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Qualification Tracker V15</h2>
-
-    <div class="sync-section">
-        <strong style="width: 100%;">🔄 Device Sync / Backup</strong>
-        <button class="btn-sync" onclick="exportBackup()">Save Backup File</button>
-        <button class="btn-sync" style="background-color: #6c757d;" onclick="document.getElementById('importFile').click()">Load Backup File</button>
-        <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
-        <p id="iosWarning" class="warning-text">⚠️ iOS Detected: Click 'Save Backup File' to keep data.</p>
-    </div>
-
-    <div class="setup-section">
-        <h3>Range Setup & Naming</h3>
-        <div class="control-row">
-            <div class="input-group">
-                <label>Range/Location</label>
-                <input type="text" id="rangeLocation" placeholder="e.g. Range 4" oninput="updateConfig()">
-            </div>
-            <div class="input-group">
-                <label>Event Type</label>
-                <input type="text" id="qualName" placeholder="e.g. M4_Qual" oninput="updateConfig()">
-            </div>
-            <div class="input-group">
-                <label>Date</label>
-                <input type="date" id="rangeDate" onchange="updateConfig()">
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dashboard" class="view active">
+        <div class="header-bar">
+            <h2>Dashboard / File Manager</h2>
+            <div>
+                <button class="btn-save" onclick="createNewEvent()">+ New Event</button>
+                <button class="btn-export" onclick="showMasterRoster()">View Master Roster</button>
             </div>
         </div>
-        <p><strong>Current Filename:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Qual_Report.csv</span></p>
-        <hr>
-        <div class="control-row">
-            <div class="input-group">
-                <label>Add Qualification Type (e.g. Day, CBRN, Night)</label>
-                <div class="col-adder-group">
-                    <input type="text" id="newScoreLabel" placeholder="Label">
-                    <input type="number" id="newScoreThreshold" placeholder="Pass Score">
-                    <button class="btn-save" onclick="addColumn()">+ Add Type</button>
+        
+        <div class="sync-section">
+            <strong style="width: 100%;">🔄 System Operations</strong>
+            <!-- The Fix is on this button: Clears the value before clicking -->
+            <button class="btn-secondary" onclick="document.getElementById('importFile').value=''; document.getElementById('importFile').click()">Load Backup File</button>
+            <input type="file" id="importFile" style="display:none" accept=".json" multiple onchange="importBackup(event)">
+            <button class="btn-clear" onclick="wipeAllSystemData()">Wipe All System Data</button>
+            <p style="margin:0; font-size:12px; width:100%;">* Note: You can select multiple .json backup files when loading to merge data.</p>
+            <p id="iosWarning" class="warning-text">⚠️ iOS Detected: Frequently export backups as clearing cache deletes local data.</p>
+        </div>
+
+        <h3>Active Training Events</h3>
+        <div id="dashboardGrid" class="dashboard-grid"></div>
+    </div>
+
+    <!-- EVENT TRACKER VIEW -->
+    <div id="view-event" class="view">
+        <div class="header-bar">
+            <h2>Qualification Tracker V16.8</h2>
+            <button class="btn-secondary" onclick="showDashboard()">← Back to Dashboard</button>
+        </div>
+
+        <div class="sync-section">
+            <strong style="width: 100%;">🔄 Event Options</strong>
+            <button class="btn-sync" onclick="exportBackup()">Save Backup File (.json)</button>
+            <button class="btn-export" onclick="exportToCSV()">Export Report (.csv)</button>
+            <button class="btn-clear" onclick="deleteCurrentEvent()">Delete Event</button>
+        </div>
+
+        <div class="setup-section">
+            <h3>Range Setup</h3>
+            <div class="control-row">
+                <div class="input-group">
+                    <label>Range/Location</label>
+                    <input type="text" id="rangeLocation" placeholder="e.g. Range 4" oninput="updateConfig()">
+                </div>
+                <div class="input-group">
+                    <label>Event Name</label>
+                    <input type="text" id="qualName" placeholder="e.g. M4_Qual" oninput="updateConfig()">
+                </div>
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="rangeDate" onchange="updateConfig()">
                 </div>
             </div>
+            <p><strong>Export Filename:</strong> <span id="fileNamePreview" style="color:var(--info-blue)">Qual_Report.csv</span></p>
+
+            <hr>
+            <div class="control-row">
+                <div class="input-group">
+                    <label>Add/Edit Qualification Target</label>
+                    <div class="col-adder-group">
+                        <input type="hidden" id="editColIndex" value="-1">
+                        <input type="text" id="newScoreLabel" placeholder="Label (e.g., Day)">
+                        <input type="number" id="newScoreThreshold" placeholder="Score">
+                        <select id="newScoreCondition">
+                            <option value="gte">>= (Pass if higher/equal)</option>
+                            <option value="lte"><= (Pass if lower/equal)</option>
+                        </select>
+                        <button id="addColBtn" class="btn-save" onclick="saveColumn()">+ Add</button>
+                        <button id="cancelColBtn" class="btn-secondary" style="display:none;" onclick="resetColumnForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="activeColumnsList" style="margin-top: 10px;"></div>
         </div>
-        <div id="activeColumnsList"></div>
-    </div>
 
-    <h3>Unit Totals</h3>
-    <div class="stats-banner">
-        <div class="stat-card"><div class="stat-label">Total Personnel</div><div id="statTotal" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">Fully Qualified</div><div id="statQual" class="stat-value status-qual">0</div></div>
-        <div class="stat-card"><div class="stat-label">Any Failure</div><div id="statUnqual" class="stat-value status-unqual">0</div></div>
-        <div class="stat-card"><div class="stat-label">Incomplete</div><div id="statPending" class="stat-value status-pending">0</div></div>
-    </div>
-
-    <h3>Detailed Type Breakout</h3>
-    <div id="typeBreakoutArea" class="type-breakout-grid">
-        <!-- Dynamic Cards added here -->
-    </div>
-
-    <div class="control-row" style="justify-content: center;">
-        <button class="btn-export" style="flex: 1; max-width: 250px;" onclick="exportToCSV()">Export for Excel</button>
-        <button class="btn-clear" style="flex: 1; max-width: 250px;" onclick="clearAllData()">Clear All Data</button>
-    </div>
-
-    <h3>Roster Entry</h3>
-    <div class="form-grid">
-        <div class="input-group"><label>First Name</label><input type="text" id="firstName" class="req-input"></div>
-        <div class="input-group"><label>Last Name</label><input type="text" id="lastName" class="req-input"></div>
-        <div class="input-group">
-            <label>Rank</label>
-            <select id="rank" class="req-input">
-                <option value="">Select Rank...</option>
-                <optgroup label="Enlisted">
-                    <option value="PVT">PVT</option><option value="PV2">PV2</option><option value="PFC">PFC</option>
-                    <option value="SPC">SPC</option><option value="CPL">CPL</option><option value="SGT">SGT</option>
-                    <option value="SSG">SSG</option><option value="SFC">SFC</option><option value="MSG">MSG</option>
-                    <option value="1SG">1SG</option><option value="SGM">SGM</option><option value="CSM">CSM</option>
-                </optgroup>
-                <optgroup label="Warrant Officers">
-                    <option value="WO1">WO1</option><option value="CW2">CW2</option><option value="CW3">CW3</option>
-                    <option value="CW4">CW4</option><option value="CW5">CW5</option>
-                </optgroup>
-                <optgroup label="Officers">
-                    <option value="2LT">2LT</option><option value="1LT">1LT</option><option value="CPT">CPT</option>
-                    <option value="MAJ">MAJ</option><option value="LTC">LTC</option><option value="COL">COL</option>
-                </optgroup>
-            </select>
+        <h3>Unit Totals</h3>
+        <div class="stats-banner">
+            <div class="stat-card"><div class="stat-label">Total Personnel</div><div id="statTotal" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Fully Qualified</div><div id="statQual" class="stat-value status-qual">0</div></div>
+            <div class="stat-card"><div class="stat-label">Any Failure</div><div id="statUnqual" class="stat-value status-unqual">0</div></div>
+            <div class="stat-card"><div class="stat-label">Incomplete</div><div id="statPending" class="stat-value status-pending">0</div></div>
         </div>
-        <div class="input-group"><label>Unit</label><input type="text" id="unit" class="req-input"></div>
-        <div class="input-group"><label>Company</label><input type="text" id="company" class="req-input"></div>
-        <div class="input-group"><label>&nbsp;</label><button id="submitBtn" class="btn-save" onclick="addSoldier()" disabled>Add Soldier</button></div>
+
+        <h3>Detailed Type Breakout</h3>
+        <div id="typeBreakoutArea" class="type-breakout-grid"></div>
+
+        <h3 id="rosterEntrySection">Roster Entry</h3>
+        <input type="hidden" id="editSoldierId" value="-1">
+        <div class="form-grid">
+            <div class="input-group"><label>First Name</label><input type="text" id="firstName" class="req-input"></div>
+            <div class="input-group"><label>Last Name</label><input type="text" id="lastName" class="req-input"></div>
+            <div class="input-group">
+                <label>Rank</label>
+                <select id="rank" class="req-input">
+                    <option value="">Select...</option>
+                    <optgroup label="Enlisted">
+                        <option value="PVT">PVT</option><option value="PV2">PV2</option><option value="PFC">PFC</option>
+                        <option value="SPC">SPC</option><option value="CPL">CPL</option><option value="SGT">SGT</option>
+                        <option value="SSG">SSG</option><option value="SFC">SFC</option><option value="MSG">MSG</option>
+                        <option value="1SG">1SG</option><option value="SGM">SGM</option><option value="CSM">CSM</option>
+                    </optgroup>
+                    <optgroup label="Warrant">
+                        <option value="WO1">WO1</option><option value="CW2">CW2</option><option value="CW3">CW3</option>
+                        <option value="CW4">CW4</option><option value="CW5">CW5</option>
+                    </optgroup>
+                    <optgroup label="Officers">
+                        <option value="2LT">2LT</option><option value="1LT">1LT</option><option value="CPT">CPT</option>
+                        <option value="MAJ">MAJ</option><option value="LTC">LTC</option><option value="COL">COL</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="input-group"><label>Unit</label><input type="text" id="unit" class="req-input"></div>
+            <div class="input-group"><label>Company</label><input type="text" id="company" class="req-input"></div>
+            <div class="input-group" style="flex-direction: row; align-items: flex-end; gap: 5px;">
+                <button id="submitBtn" class="btn-save" onclick="saveSoldier()" disabled style="flex: 2;">Add Soldier</button>
+                <button id="cancelSoldierBtn" class="btn-secondary" onclick="resetSoldierForm()" style="display: none; flex: 1;">Cancel</button>
+            </div>
+        </div>
+
+        <h3>Roster Details</h3>
+        <input type="text" id="eventSearch" class="search-bar" placeholder="Search event roster..." onkeyup="searchTable('eventSearch', 'tableBody')">
+        <table id="dataTable">
+            <thead id="tableHeader"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 
-    <h3>Roster Details</h3>
-    <table id="dataTable">
-        <thead id="tableHeader"></thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <!-- MASTER ROSTER VIEW -->
+    <div id="view-master" class="view">
+        <div class="header-bar">
+            <h2>Master Conglomerated Roster</h2>
+            <button class="btn-secondary" onclick="showDashboard()">← Back to Dashboard</button>
+        </div>
+
+        <div class="sync-section">
+            <strong style="width: 100%;">🔄 Master Operations</strong>
+            <button class="btn-export" onclick="exportMasterToCSV()">Export Master Report (.csv)</button>
+            <p style="margin:0; width:100%;">Consolidated view across all events. Records merged by <strong>Name and Unit</strong>.</p>
+        </div>
+
+        <h3>Master Unit Totals</h3>
+        <div class="stats-banner" id="masterStatsBanner"></div>
+
+        <h3>Master Detailed Type Breakout</h3>
+        <div id="masterTypeBreakoutArea" class="type-breakout-grid"></div>
+
+        <h3>Master Roster Details</h3>
+        <input type="text" id="masterSearch" class="search-bar" placeholder="Search master roster..." onkeyup="searchTable('masterSearch', 'masterBody')">
+        <table id="masterTable">
+            <thead id="masterHeader"></thead>
+            <tbody id="masterBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'mil_range_v15_final';
-    let appData = {
-        config: { range: "", event: "", date: new Date().toISOString().split('T')[0], columns: [{ label: "Day", threshold: 23 }] },
-        roster: []
+    const STORAGE_KEY = 'mil_range_v16_spa';
+    
+    let appState = {
+        events: {}, 
+        currentEventId: null
     };
+
+    function getLocalDateString(dateObj = new Date()) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
 
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
         document.getElementById('iosWarning').style.display = 'block';
@@ -199,220 +279,373 @@
 
     function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) appData = JSON.parse(saved);
-        
-        document.getElementById('rangeLocation').value = appData.config.range || "";
-        document.getElementById('qualName').value = appData.config.event || "";
-        document.getElementById('rangeDate').value = appData.config.date || "";
-        
-        renderUI();
+        if (saved) {
+            try { appState = JSON.parse(saved); } catch(e) { console.error("Data load failed", e); }
+        }
+        showDashboard();
     }
 
-    function save() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        renderUI();
+    function saveSystem() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
     }
 
-    const reqInputs = document.querySelectorAll('.req-input');
-    const submitBtn = document.getElementById('submitBtn');
-    function checkValidity() {
-        let allFilled = true;
-        reqInputs.forEach(i => { if (!i.value.trim()) allFilled = false; });
-        submitBtn.disabled = !allFilled;
-    }
-    reqInputs.forEach(i => i.addEventListener('input', checkValidity));
+    function getCurEv() { return appState.events[appState.currentEventId]; }
 
-    function updateConfig() {
-        appData.config.range = document.getElementById('rangeLocation').value;
-        appData.config.event = document.getElementById('qualName').value;
-        appData.config.date = document.getElementById('rangeDate').value;
-        save();
-    }
-
-    function addColumn() {
-        const label = document.getElementById('newScoreLabel').value.trim();
-        const thresh = parseInt(document.getElementById('newScoreThreshold').value);
-        if (!label || isNaN(thresh)) return alert("Enter label and threshold");
-        
-        appData.config.columns.push({ label, threshold: thresh });
-        appData.roster.forEach(s => { if (s.scores[label] === undefined) s.scores[label] = ""; });
-        document.getElementById('newScoreLabel').value = "";
-        document.getElementById('newScoreThreshold').value = "";
-        save();
-    }
-
-    function removeColumn(index) {
-        if (confirm("Remove column and all associated scores?")) {
-            appData.config.columns.splice(index, 1);
-            save();
+    function searchTable(inputId, tbodyId) {
+        const filter = document.getElementById(inputId).value.toLowerCase();
+        const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const rowText = rows[i].textContent.toLowerCase();
+            rows[i].style.display = rowText.includes(filter) ? "" : "none";
         }
     }
 
-    function addSoldier() {
-        const soldier = {
-            id: Date.now().toString(),
-            firstName: document.getElementById('firstName').value.trim(),
-            lastName: document.getElementById('lastName').value.trim(),
-            rank: document.getElementById('rank').value,
-            unit: document.getElementById('unit').value.trim(),
-            company: document.getElementById('company').value.trim(),
-            scores: {}
-        };
-        appData.config.columns.forEach(c => soldier.scores[c.label] = "");
-        appData.roster.push(soldier);
+    function showDashboard() {
+        appState.currentEventId = null;
+        const grid = document.getElementById('dashboardGrid');
+        grid.innerHTML = '';
+        let evtKeys = Object.keys(appState.events);
+        if(evtKeys.length === 0) {
+            grid.innerHTML = '<p style="color:#666; grid-column: 1/-1;">No events found.</p>';
+        } else {
+            evtKeys.sort((a,b) => new Date(appState.events[b].config.date) - new Date(appState.events[a].config.date)).forEach(id => {
+                const ev = appState.events[id];
+                const card = document.createElement('div');
+                card.className = 'event-card';
+                card.onclick = () => openEvent(id);
+                card.innerHTML = `<h3>${ev.config.event || 'Unnamed Event'}</h3><p><strong>Range:</strong> ${ev.config.range || 'N/A'}</p><p><strong>Date:</strong> ${ev.config.date}</p><p><strong>Personnel:</strong> ${ev.roster.length}</p>`;
+                grid.appendChild(card);
+            });
+        }
+        switchView('view-dashboard');
+    }
+
+    function createNewEvent() {
+        const id = 'evt_' + Date.now();
+        const today = getLocalDateString();
+        appState.events[id] = { id: id, config: { range: "", event: "New_Qual", date: today, columns: [{ label: "Day", threshold: 23, condition: 'gte' }] }, roster: [] };
+        saveSystem(); openEvent(id);
+    }
+
+    function openEvent(id) {
+        appState.currentEventId = id;
+        const ev = getCurEv();
+        document.getElementById('rangeLocation').value = ev.config.range;
+        document.getElementById('qualName').value = ev.config.event;
+        document.getElementById('rangeDate').value = ev.config.date;
+        resetColumnForm(); resetSoldierForm(); renderEventUI(); updateConfig(); switchView('view-event');
+    }
+
+    function updateConfig() {
+        const ev = getCurEv();
+        ev.config.range = document.getElementById('rangeLocation').value;
+        ev.config.event = document.getElementById('qualName').value;
+        ev.config.date = document.getElementById('rangeDate').value;
+        const safeRange = (ev.config.range || "NoRange").replace(/\s+/g, '_');
+        const safeEvent = (ev.config.event || "NoEvent").replace(/\s+/g, '_');
+        document.getElementById('fileNamePreview').innerText = `${safeRange}_${safeEvent}_Report_${ev.config.date}.csv`;
+        saveSystem();
+    }
+
+    // --- Column/Target Logic ---
+    function saveColumn() {
+        const ev = getCurEv();
+        const label = document.getElementById('newScoreLabel').value.trim();
+        const thresh = parseInt(document.getElementById('newScoreThreshold').value);
+        const cond = document.getElementById('newScoreCondition').value;
+        const editIdx = parseInt(document.getElementById('editColIndex').value);
+        if (!label || isNaN(thresh)) return alert("Enter label and threshold");
+        if (editIdx >= 0) {
+            const oldLabel = ev.config.columns[editIdx].label;
+            ev.config.columns[editIdx] = { label, threshold: thresh, condition: cond };
+            if (oldLabel !== label) {
+                ev.roster.forEach(s => { s.scores[label] = s.scores[oldLabel]; delete s.scores[oldLabel]; });
+            }
+        } else {
+            ev.config.columns.push({ label, threshold: thresh, condition: cond });
+            ev.roster.forEach(s => { if (s.scores[label] === undefined) s.scores[label] = ""; });
+        }
+        resetColumnForm(); saveSystem(); renderEventUI();
+    }
+
+    function editColumn(index) {
+        const ev = getCurEv();
+        const col = ev.config.columns[index];
+        document.getElementById('newScoreLabel').value = col.label;
+        document.getElementById('newScoreThreshold').value = col.threshold;
+        document.getElementById('newScoreCondition').value = col.condition;
+        document.getElementById('editColIndex').value = index;
+        document.getElementById('addColBtn').innerText = "Update";
+        document.getElementById('cancelColBtn').style.display = "inline-block";
+    }
+
+    function deleteColumn(index) {
+        const ev = getCurEv();
+        if(confirm(`Delete "${ev.config.columns[index].label}" target?`)) {
+            const label = ev.config.columns[index].label;
+            ev.config.columns.splice(index, 1);
+            ev.roster.forEach(s => delete s.scores[label]);
+            saveSystem(); renderEventUI();
+        }
+    }
+
+    function resetColumnForm() {
+        document.getElementById('newScoreLabel').value = "";
+        document.getElementById('newScoreThreshold').value = "";
+        document.getElementById('newScoreCondition').value = "gte";
+        document.getElementById('editColIndex').value = "-1";
+        document.getElementById('addColBtn').innerText = "+ Add";
+        document.getElementById('cancelColBtn').style.display = "none";
+    }
+
+    // --- Soldier/Roster Entry Logic ---
+    const reqInputs = document.querySelectorAll('.req-input');
+    function checkValidity() {
+        let allFilled = true;
+        reqInputs.forEach(i => { if (!i.value.trim()) allFilled = false; });
+        document.getElementById('submitBtn').disabled = !allFilled;
+    }
+    reqInputs.forEach(i => i.addEventListener('input', checkValidity));
+
+    function saveSoldier() {
+        const ev = getCurEv();
+        const editSid = document.getElementById('editSoldierId').value;
         
-        document.getElementById('firstName').value = "";
-        document.getElementById('lastName').value = "";
-        document.getElementById('rank').value = "";
-        document.getElementById('unit').value = "";
-        document.getElementById('company').value = "";
+        const fName = document.getElementById('firstName').value.trim();
+        const lName = document.getElementById('lastName').value.trim();
+        const rank = document.getElementById('rank').value;
+        const unit = document.getElementById('unit').value.trim();
+        const co = document.getElementById('company').value.trim();
+
+        if (editSid !== "-1") {
+            const s = ev.roster.find(x => x.id === editSid);
+            if (s) {
+                s.firstName = fName; s.lastName = lName; s.rank = rank; s.unit = unit; s.company = co;
+            }
+        } else {
+            const soldier = { id: Date.now().toString(), firstName: fName, lastName: lName, rank: rank, unit: unit, company: co, scores: {} };
+            ev.config.columns.forEach(c => soldier.scores[c.label] = "");
+            ev.roster.unshift(soldier);
+        }
         
-        save();
+        resetSoldierForm();
+        saveSystem();
+        renderEventUI();
+    }
+
+    function editSoldier(sid) {
+        const ev = getCurEv();
+        const s = ev.roster.find(x => x.id === sid);
+        if (!s) return;
+
+        document.getElementById('editSoldierId').value = s.id;
+        document.getElementById('firstName').value = s.firstName;
+        document.getElementById('lastName').value = s.lastName;
+        document.getElementById('rank').value = s.rank;
+        document.getElementById('unit').value = s.unit;
+        document.getElementById('company').value = s.company;
+
+        document.getElementById('submitBtn').innerText = "Update Soldier";
+        document.getElementById('cancelSoldierBtn').style.display = "inline-block";
         checkValidity();
-        document.getElementById('firstName').focus();
+        
+        document.getElementById('rosterEntrySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetSoldierForm() {
+        document.getElementById('editSoldierId').value = "-1";
+        reqInputs.forEach(i => i.value = "");
+        document.getElementById('submitBtn').innerText = "Add Soldier";
+        document.getElementById('cancelSoldierBtn').style.display = "none";
+        checkValidity();
     }
 
     function updateScore(sid, label, val) {
-        const s = appData.roster.find(x => x.id === sid);
-        if (s) { s.scores[label] = val; save(); }
+        const s = getCurEv().roster.find(x => x.id === sid);
+        if (s) { s.scores[label] = val; saveSystem(); renderEventUI(); }
     }
 
-    function renderUI() {
-        const nameStr = `${appData.config.event || 'Qual'}_${appData.config.range || 'Range'}_${appData.config.date}.csv`.replace(/\s+/g, '_');
-        document.getElementById('fileNamePreview').innerText = nameStr;
+    function evalScore(val, threshold, condition) {
+        if (val === "" || val === undefined) return { txt: "Pending", css: "status-pending", pass: false, empty: true };
+        const num = parseInt(val);
+        const passed = condition === 'lte' ? (num <= threshold) : (num >= threshold);
+        return passed ? { txt: "Pass", css: "status-qual", pass: true, empty: false } : { txt: "Fail", css: "status-unqual", pass: false, empty: false };
+    }
 
-        document.getElementById('activeColumnsList').innerHTML = appData.config.columns.map((c, i) => `
-            <span class="score-type-tag">${c.label} (Min: ${c.threshold}) 
-            <span class="remove-score-btn" onclick="removeColumn(${i})">×</span></span>
+    function renderEventUI() {
+        const ev = getCurEv();
+        const colList = document.getElementById('activeColumnsList');
+        colList.innerHTML = ev.config.columns.map((c, idx) => `
+            <span class="score-type-tag">
+                ${c.label} (${c.condition === 'gte' ? '≥' : '≤'}${c.threshold})
+                <span class="score-btn edit" onclick="editColumn(${idx})">✎</span>
+                <span class="score-btn remove" onclick="deleteColumn(${idx})">×</span>
+            </span>
         `).join('');
 
-        document.getElementById('tableHeader').innerHTML = `<tr>
-            <th>Name</th><th>Rank</th><th>Unit/Co</th>` + 
-            appData.config.columns.map(c => `<th>${c.label}</th>`).join('') + `<th>Action</th></tr>`;
-
+        document.getElementById('tableHeader').innerHTML = `<tr><th>Name</th><th>Rank</th><th>Unit</th><th>Co</th>` + ev.config.columns.map(c => `<th>${c.label}</th>`).join('') + `<th>Action</th></tr>`;
+        
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
-        
-        // Stats tracking
-        let globalStats = { total: appData.roster.length, fullyQual: 0, anyFail: 0, pending: 0 };
-        let typeBreakdowns = {}; 
-        appData.config.columns.forEach(c => { typeBreakdowns[c.label] = { pass: 0, fail: 0, open: 0 }; });
+        let stats = { total: ev.roster.length, qual: 0, fail: 0, pend: 0 };
+        let breakouts = {}; ev.config.columns.forEach(c => breakouts[c.label] = { pass: 0, fail: 0, open: 0 });
 
-        appData.roster.forEach(s => {
-            let soldierStatus = "qual"; 
-            let hasEmpty = false;
-
-            const scoreCells = appData.config.columns.map(c => {
-                const val = s.scores[c.label];
-                let css = "status-pending", txt = "Pending";
-                
-                if (val !== "") {
-                    if (parseInt(val) >= c.threshold) { 
-                        txt = "Pass"; css = "status-qual"; 
-                        typeBreakdowns[c.label].pass++;
-                    } else { 
-                        txt = "Fail"; css = "status-unqual"; 
-                        soldierStatus = "unqual"; 
-                        typeBreakdowns[c.label].fail++;
-                    }
-                } else { 
-                    hasEmpty = true; 
-                    typeBreakdowns[c.label].open++;
-                }
-
-                return `<td data-label="${c.label}">
-                    <input type="number" class="score-input" value="${val}" onchange="updateScore('${s.id}', '${c.label}', this.value)">
-                    <div class="status-box ${css}" style="font-size:11px">${txt}</div>
-                </td>`;
+        ev.roster.forEach(s => {
+            let sStat = "qual", sEmpty = false;
+            const cells = ev.config.columns.map(c => {
+                const res = evalScore(s.scores[c.label], c.threshold, c.condition);
+                if (res.empty) { sEmpty = true; breakouts[c.label].open++; }
+                else if (res.pass) breakouts[c.label].pass++;
+                else { sStat = "unqual"; breakouts[c.label].fail++; }
+                return `<td data-label="${c.label}"><input type="number" class="score-input" value="${s.scores[c.label]}" onchange="updateScore('${s.id}','${c.label}',this.value)"><div class="${res.css}">${res.txt}</div></td>`;
             }).join('');
 
-            if (hasEmpty) globalStats.pending++;
-            else if (soldierStatus === "qual") globalStats.fullyQual++;
-            else globalStats.anyFail++;
-
+            if (sEmpty) stats.pend++; else if (sStat === "qual") stats.qual++; else stats.fail++;
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Name">${s.lastName}, ${s.firstName}</td>
-                <td data-label="Rank">${s.rank}</td>
-                <td data-label="Unit/Co">${s.unit} / ${s.company}</td>
-                ${scoreCells}
-                <td data-label="Action"><button class="btn-clear" style="padding:5px 10px; font-size:11px" onclick="deleteSoldier('${s.id}')">Remove</button></td>
-            `;
+            tr.innerHTML = `<td data-label="Name"><strong>${s.lastName}</strong>, ${s.firstName}</td><td data-label="Rank">${s.rank}</td><td data-label="Unit">${s.unit}</td><td data-label="Co">${s.company}</td>${cells}<td><button class="btn-save" style="margin-right:5px;" onclick="editSoldier('${s.id}')">✎</button><button class="btn-clear" onclick="deleteSoldier('${s.id}')">×</button></td>`;
             tbody.appendChild(tr);
         });
 
-        // Update Top Banner
-        document.getElementById('statTotal').innerText = globalStats.total;
-        document.getElementById('statQual').innerText = globalStats.fullyQual;
-        document.getElementById('statUnqual').innerText = globalStats.anyFail;
-        document.getElementById('statPending').innerText = globalStats.pending;
+        document.getElementById('statTotal').innerText = stats.total;
+        document.getElementById('statQual').innerText = stats.qual;
+        document.getElementById('statUnqual').innerText = stats.fail;
+        document.getElementById('statPending').innerText = stats.pend;
+        document.getElementById('typeBreakoutArea').innerHTML = ev.config.columns.map(c => `<div class="stat-card breakout"><div class="stat-label">${c.label}</div><div class="stat-value">${breakouts[c.label].pass}</div><div class="breakout-sub"><span class="status-unqual">F: ${breakouts[c.label].fail}</span><span class="status-pending">P: ${breakouts[c.label].open}</span></div></div>`).join('');
+    }
 
-        // Update Type Breakouts
-        const breakoutArea = document.getElementById('typeBreakoutArea');
-        breakoutArea.innerHTML = appData.config.columns.map(c => {
-            const b = typeBreakdowns[c.label];
-            return `
-                <div class="stat-card breakout">
-                    <div class="stat-label">${c.label} Breakdown</div>
-                    <div class="stat-value">${b.pass} <span style="font-size:12px; color:#666">Passed</span></div>
-                    <div class="breakout-sub">
-                        <span class="status-unqual">Fails: ${b.fail}</span>
-                        <span class="status-pending">Left: ${b.open}</span>
-                    </div>
-                </div>
-            `;
+    function deleteSoldier(sid) {
+        const ev = getCurEv();
+        const s = ev.roster.find(x => x.id === sid);
+        if (s && confirm(`Are you sure you want to completely remove ${s.rank} ${s.lastName}, ${s.firstName} from this event?`)) {
+            ev.roster = ev.roster.filter(x => x.id !== sid);
+            saveSystem(); 
+            renderEventUI();
+        }
+    }
+
+    // --- Master Roster (Consolidated) ---
+    function getMasterData() {
+        const allSoldiers = {}; const allCols = new Set();
+        Object.values(appState.events).forEach(ev => {
+            const prefix = ev.config.event || 'Qual';
+            ev.config.columns.forEach(c => allCols.add(`${prefix} - ${c.label}`));
+            ev.roster.forEach(s => {
+                const key = `${s.lastName.toUpperCase()}, ${s.firstName.toUpperCase()} | ${s.unit.toUpperCase()}`;
+                if(!allSoldiers[key]) allSoldiers[key] = { name: `${s.lastName}, ${s.firstName}`, rank: s.rank, unit: s.unit, company: s.company, quals: {} };
+                ev.config.columns.forEach(c => {
+                    const colId = `${prefix} - ${c.label}`;
+                    const res = evalScore(s.scores[c.label], c.threshold, c.condition);
+                    if (res.pass) allSoldiers[key].quals[colId] = "Pass";
+                    else if (allSoldiers[key].quals[colId] !== "Pass") allSoldiers[key].quals[colId] = res.txt;
+                });
+            });
+        });
+        return { soldiers: Object.values(allSoldiers), columns: Array.from(allCols).sort() };
+    }
+
+    function showMasterRoster() {
+        const data = getMasterData();
+        const stats = { total: data.soldiers.length, qual: 0, fail: 0, pend: 0 };
+        const breakouts = {}; data.columns.forEach(c => breakouts[c] = { pass: 0, fail: 0, open: 0 });
+
+        data.soldiers.forEach(s => {
+            let sFail = false, sPend = false, sPass = false;
+            data.columns.forEach(c => {
+                const st = s.quals[c] || "No Data";
+                if (st === "Pass") { breakouts[c].pass++; sPass = true; }
+                else if (st === "Fail") { breakouts[c].fail++; sFail = true; }
+                else if (st === "Pending") { breakouts[c].open++; sPend = true; }
+            });
+            if (sFail) stats.fail++; else if (sPend) stats.pend++; else if (sPass) stats.qual++;
+        });
+
+        document.getElementById('masterStatsBanner').innerHTML = `<div class="stat-card"><div class="stat-label">Total Personnel</div><div class="stat-value">${stats.total}</div></div><div class="stat-card"><div class="stat-label">Fully Qualified</div><div class="stat-value status-qual">${stats.qual}</div></div><div class="stat-card"><div class="stat-label">Any Failure</div><div class="stat-value status-unqual">${stats.fail}</div></div><div class="stat-card"><div class="stat-label">Incomplete</div><div class="stat-value status-pending">${stats.pend}</div></div>`;
+        document.getElementById('masterTypeBreakoutArea').innerHTML = data.columns.map(c => `<div class="stat-card breakout"><div class="stat-label">${c}</div><div class="stat-value">${breakouts[c].pass}</div><div class="breakout-sub"><span class="status-unqual">F: ${breakouts[c].fail}</span><span class="status-pending">P: ${breakouts[c].open}</span></div></div>`).join('');
+        document.getElementById('masterHeader').innerHTML = `<tr><th>Name</th><th>Rank</th><th>Unit</th><th>Company</th>` + data.columns.map(c => `<th>${c}</th>`).join('') + `</tr>`;
+        const tbody = document.getElementById('masterBody');
+        tbody.innerHTML = data.soldiers.sort((a,b) => a.name.localeCompare(b.name)).map(s => {
+            const cells = data.columns.map(c => {
+                const st = s.quals[c] || "No Data";
+                const bc = st === "Pass" ? "bg-pass" : (st === "Fail" ? "bg-fail" : "bg-pend");
+                const disp = st === "No Data" ? "-" : `<span class="badge ${bc}">${st}</span>`;
+                return `<td data-label="${c}">${disp}</td>`;
+            }).join('');
+            return `<tr><td><strong>${s.name}</strong></td><td>${s.rank}</td><td>${s.unit}</td><td>${s.company}</td>${cells}</tr>`;
         }).join('');
-    }
-
-    function deleteSoldier(id) {
-        if(confirm("Delete record?")) { appData.roster = appData.roster.filter(s => s.id !== id); save(); }
-    }
-
-    function clearAllData() {
-        if(confirm("WIPE ALL DATA?")) { appData.roster = []; save(); }
+        switchView('view-master');
     }
 
     function exportToCSV() {
-        if (!appData.roster.length) return alert("No data");
-        let headers = ["Last Name", "First Name", "Rank", "Unit", "Company"];
-        appData.config.columns.forEach(c => headers.push(c.label, `${c.label}_Status`));
-        let csv = headers.join(",") + "\n";
-        appData.roster.forEach(s => {
+        const ev = getCurEv();
+        if (!ev.roster.length) return alert("No personnel to export");
+        let csv = `EVENT REPORT: ${ev.config.event}\nRange: ${ev.config.range}\nDate: ${ev.config.date}\n\n`;
+        let headers = ["Last Name", "First Name", "Rank", "Unit", "Company", ...ev.config.columns.map(c => c.label), "Status"];
+        csv += headers.join(",") + "\n";
+        ev.roster.forEach(s => {
             let row = [s.lastName, s.firstName, s.rank, s.unit, s.company];
-            appData.config.columns.forEach(c => {
-                const val = s.scores[c.label];
-                let st = val==="" ? "Pending" : (parseInt(val)>=c.threshold ? "Pass" : "Fail");
-                row.push(val, st);
+            let sStat = "Qualified"; let sEmpty = false;
+            ev.config.columns.forEach(c => {
+                const res = evalScore(s.scores[c.label], c.threshold, c.condition);
+                row.push(s.scores[c.label] || "0");
+                if (res.empty) sEmpty = true; else if (!res.pass) sStat = "Unqualified";
             });
+            if (sEmpty) sStat = "Incomplete"; row.push(sStat);
+            csv += row.map(v => `"${v}"`).join(",") + "\n";
+        });
+        const safeRange = (ev.config.range || "NoRange").replace(/\s+/g, '_');
+        const safeEvent = (ev.config.event || "NoEvent").replace(/\s+/g, '_');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${safeRange}_${safeEvent}_Report_${ev.config.date}.csv`;
+        a.click();
+    }
+
+    function exportMasterToCSV() {
+        const data = getMasterData();
+        if (!data.soldiers.length) return alert("No data");
+        let csv = "MASTER CONSOLIDATED ROSTER\nGenerated:," + new Date().toLocaleString() + "\n\n";
+        let headers = ["Name", "Rank", "Unit", "Company", ...data.columns];
+        csv += headers.join(",") + "\n";
+        data.soldiers.sort((a,b) => a.name.localeCompare(b.name)).forEach(s => {
+            let row = [s.name, s.rank, s.unit, s.company];
+            data.columns.forEach(c => row.push(s.quals[c] || "No Data"));
             csv += row.map(v => `"${v}"`).join(",") + "\n";
         });
         const blob = new Blob([csv], { type: 'text/csv' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = document.getElementById('fileNamePreview').innerText;
+        a.download = `Master_Roster_Export_${getLocalDateString()}.csv`;
         a.click();
     }
 
     function exportBackup() {
-        const blob = new Blob([JSON.stringify(appData)], { type: 'application/json' });
+        const ev = getCurEv();
+        const blob = new Blob([JSON.stringify({ version: 16.8, events: { [ev.id]: ev } })], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `Range_Backup_${appData.config.date}.json`;
+        a.download = `${ev.config.event}_backup.json`.replace(/\s+/g, '_');
         a.click();
     }
 
     function importBackup(event) {
-        const reader = new FileReader();
-        reader.onload = (e) => { 
-            try {
-                appData = JSON.parse(e.target.result); 
-                save(); 
-            } catch(err) { alert("Invalid backup file"); }
-        };
-        reader.readAsText(event.target.files[0]);
+        Array.from(event.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => { 
+                try { let data = JSON.parse(e.target.result); if (data.events) Object.assign(appState.events, data.events); saveSystem(); showDashboard(); } catch(err) { console.error("Invalid file"); }
+            };
+            reader.readAsText(file);
+        });
     }
+
+    function deleteCurrentEvent() { if(confirm("Delete this event?")) { delete appState.events[appState.currentEventId]; saveSystem(); showDashboard(); } }
+    function wipeAllSystemData() { if(confirm("Wipe ALL data?")) { appState.events = {}; saveSystem(); showDashboard(); } }
 
     init();
 </script>
 </body>
 </html>
+
